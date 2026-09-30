@@ -1,70 +1,95 @@
-# safepass
-- Simple command line, self-contained password manager.
+# vault.sh
+- Simple Bash CLI, self-contained password manager.
 - Should work on most Linux/Unix based systems.
-- Require php-cli (PHP 5 >= 5.3.0) e.g. $ apt install php-cli
+- Require `bash` >= 4.4
 
 ## Features
 - AES 256 encrypted
 - Customizable strong password generation
 - Passwords and Data are embeded in source code (weird ?)
-- You can have multiple safes if you change filename
+- You can have multiple vaults just changing the filename
 - ...
 
 ## Setup
 
-- Download safepass.php
+- Download vault.sh
 - Rename it if you want
 - Chmod it +x to make it executable
 - Put it in your ~/bin directory, on a usb stick or anywhere you want
 - Masterkey (main password) will be set on your first use
 
-### Example for command line lovers
+### Example
 
 ```
-$ wget https://git.io/JDGbs -O mypersonalsafe
-$ chmod +x mypersonalsafe
-$ ./mypersonalsafe reset
+$ wget ??? -O myvault
+$ chmod +x myvault
+$ ./myvault reset
 ```
  
 ## Main commands
 
-- safepass.php add
-- safepass.php show
-- safepass.php delete
+- vault.sh add
+- vault.sh show
+- vault.sh delete
+- vault.sh update
 
 
 ## Usage
 
 ```
 USAGE
-  safepass.php COMMAND [OPTION]
+  vault.sh COMMAND [ARG]...
 
 COMMANDS
   add                add new account
+  clearmk [-r|-h]    remove cached master key (both if no option given)
   delete SERVICE     delete account by SERVICE name
-  dump [--decrypt]   display database as json
-  genpasswd          display a random generated password
-  help               display this help and exit
+  dump [--decrypt]   display database as json (--decrypt requires jq)
+  genpasswd [...]    display a random generated password
+  help, -h, --help   display this help and exit
+  import             import accounts from a vault dump on stdin
   reset              erase database, reinit
-  savemk LOCATION    save master key on disk or ram for future use
+  savemk -r|-h       save master key in ram or home for future use
   show [KEYWORD]     display accounts that match KEYWORD
+  update SERVICE     update account fields (blank keeps current value)
   version            output version information and exit
 
-SAVEMK USAGE
-  safepass.php savemk [-r|-h]
+IMPORT USAGE
+  /path/to/other-vault dump --decrypt | vault.sh import
+  vault.sh import < dump.json
 
-  -r, --ram          save masterkey temporarly in ram
-                     mk will be in /run/user/1000/safepass.php.mk
-  -h, --home         save masterkey permanently
-                     mk will be in /home/me/.safepass.php.mk
+SAVEMK USAGE
+  vault.sh savemk -r|-h
+
+  -r, --ram          save master key temporarily in ram
+                     mk will be in /run/user/<uid>/vault-<vault-id>.mk
+  -h, --home         save master key permanently
+                     mk will be in ~/.vault-<vault-id>.mk
+
+CLEARMK USAGE
+  vault.sh clearmk [-r|-h]
+
+  -r, --ram          remove only the ram-cached master key
+  -h, --home         remove only the home-cached master key
+  (no option)        remove both
 
 GENPASSWD USAGE
-  safepass.php genpasswd [len] [lc] [uc] [spec] [num]
+  vault.sh genpasswd [LEN [LC [UC [SPEC [NUM]]]]]
 
-  len                password length (default=16)
-  lc                 minimum lowercase chars (default=6)
-  uc                 exact uppercase chars (default=6)
-  spec               exact special chars (default=2)
-  num                exact numerical chars (default=2)
-
+  LEN                password length (default=16)
+  LC                 minimum lowercase chars (default=6)
+  UC                 exact uppercase chars (default=6)
+  SPEC               exact special chars (default=2)
+  NUM                exact numerical chars (default=2)
 ```
+
+## Security notice
+
+`savemk` writes your master key to disk in **plain text** (file mode 0400,
+owner-readable only, but that's no protection against root, another process
+running as you, or a backup/snapshot of the file). Anyone who reads that file
+has full access to your vault, no master key guessing required. `--ram`
+(tmpfs) is safer than `--home` (persists across reboots) but still readable
+for as long as it's cached. Use `clearmk` when you're done, and think twice
+about `--home` on a shared or otherwise untrusted machine.
+
