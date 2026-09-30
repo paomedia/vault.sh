@@ -21,9 +21,9 @@
 ### Example
 
 ```
-$ wget ??? -O myvault
+$ curl -fsSL https://u2l.ai/D4teUa -o myvault
 $ chmod +x myvault
-$ ./myvault reset
+$ ./myvault add
 ```
  
 ## Main commands
