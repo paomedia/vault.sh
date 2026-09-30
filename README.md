@@ -3,6 +3,9 @@
 - Should work on most Linux/Unix based systems.
 - Require `bash` >= 4.4
 
+![vault.sh](preview.jpg)
+
+
 ## Features
 - AES 256 encrypted
 - Customizable strong password generation
